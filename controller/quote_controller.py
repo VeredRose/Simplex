@@ -1,3 +1,7 @@
+from http.client import HTTPResponse
+
+from fastapi import HTTPException
+
 from model.output_quote import OutputQuote
 from service.quote_service import get_data_from_api
 import fastapi
@@ -9,6 +13,8 @@ app = fastapi.FastAPI()
 @app.route("/api/quote", methods=['GET'])
 async def data(from_currency_code, amount, to_currency_code):
     exchange_rate, provider_name = get_data_from_api(from_currency_code, to_currency_code)
+    if exchange_rate is None or provider_name is None:
+        return HTTPException(400, "Invalid input")
     output = OutputQuote(exchange_rate=exchange_rate,
                          currency_code=to_currency_code,
                          amount_output=float(amount) * exchange_rate,
